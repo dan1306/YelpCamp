@@ -2,13 +2,15 @@ const express = require('express')
 const app = express()
 const path = require('path')
 const Campground = require('./models/campground')
-
+const methodOverride = require("method-override");
 
 require('./config/database');
 
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
+app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
 
 
 app.get('/', (req, res) => {
@@ -17,8 +19,28 @@ app.get('/', (req, res) => {
 
 app.get('/campgrounds', async (req, res) => {
     const campgrounds = await Campground.find({})
-    res.render('campgrounds/k')
+    res.render('campgrounds/index', {
+        campgrounds
+    })
 })
+
+app.get('/campgrounds/new', (req, res) => {
+    res.render('campgrounds/new')
+})
+
+app.post('/campgrounds/new', async (req, res) => {
+    const campground = new Campground(req.body)
+    await campground.save()
+    res.redirect(`/campgrounds/${campground._id}`)
+})
+
+app.get('/campgrounds/:id', async (req, res) => {
+    const campground = await Campground.findById(req.params.id)
+    res.render('campgrounds/show', {
+        campground
+    })
+})
+
 
 
 app.get('/makeCampGround', async (req, res) => {
@@ -29,7 +51,25 @@ app.get('/makeCampGround', async (req, res) => {
     res.send('camp')
 })
 
+app.get('/campgrounds/:id/edit', async (req, res) => {
+    const campground = await Campground.findById(req.params.id)
+    res.render('campgrounds/edit', {
+        campground
+    })
+})
 
+app.put('/campgrounds/:id/edit', async (req, res) => {
+    console.log(req.body)
+    let campground = await Campground.findByIdAndUpdate(req.params.id, req.body)
+    await campground.save()
+
+    res.redirect(`/campgrounds/${req.params.id}`)
+})
+
+app.delete('/campgrounds/:id', async (req, res) => {
+    let delCampground = await Campground.findByIdAndDelete(req.params.id)
+    res.redirect('/campgrounds')
+})
 
 app.listen(3000, () => {
     console.log('Port 3000')
