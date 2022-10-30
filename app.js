@@ -4,6 +4,7 @@ const path = require('path')
 const Campground = require('./models/campground')
 const methodOverride = require("method-override");
 const ejsMate = require('ejs-mate')
+const catchAsync = require('./utils/catchAsync')
 
 require('./config/database');
 
@@ -30,11 +31,16 @@ app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new')
 })
 
-app.post('/campgrounds/new', async (req, res) => {
-    const campground = new Campground(req.body)
-    await campground.save()
-    res.redirect(`/campgrounds/${campground._id}`)
-})
+app.post('/campgrounds/new', catchAsync(async (req, res, next) => {
+    try {
+        const campground = new Campground(req.body)
+        await campground.save()
+        res.redirect(`/campgrounds/${campground._id}`)
+    }
+    catch (e) {
+        next(e)
+}
+}))
 
 app.get('/campgrounds/:id', async (req, res) => {
     const campground = await Campground.findById(req.params.id)
@@ -73,6 +79,10 @@ app.delete('/campgrounds/:id', async (req, res) => {
     res.redirect('/campgrounds')
 })
 
+
+app.use((err, req, res, next) => {
+    res.send("There is something wrong here")
+})
 app.listen(3000, () => {
     console.log('Port 3000')
 })
