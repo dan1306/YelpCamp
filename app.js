@@ -17,8 +17,14 @@ const logger = require("morgan");
 const session = require('express-session')
 const flash = require("connect-flash")
 
-const campgrounds = require('./routes/campgrounds')
-const reviews = require('./routes/reviews')
+const passport = require("passport")
+const LocalStratergy = require("passport-local")
+const User = require('./models/user')
+
+const userRoutes = require('./routes/user')
+const campgroundsRoutes = require('./routes/campgrounds')
+const reviewsRoutes = require('./routes/reviews');
+
 
 require("./config/database");
 
@@ -55,14 +61,26 @@ const sessionConfig = {
 app.use(session(sessionConfig))
 app.use(flash())
 
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new LocalStratergy(User.authenticate()))
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
 
 app.use((req, res, next) => {
+  // console.log(req.session)
+  res.locals.user = req.user
   res.locals.success = req.flash('success')
   res.locals.error = req.flash('error')
+
   next()
 })
-app.use('/campgrounds', campgrounds)
-app.use('/campgrounds/:id/reviews', reviews)
+
+
+app.use('/', userRoutes)
+app.use('/campgrounds', campgroundsRoutes)
+app.use('/campgrounds/:id/reviews', reviewsRoutes)
 
 app.get("/", (req, res) => {
   res.render("home");

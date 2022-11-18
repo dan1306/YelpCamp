@@ -6,23 +6,25 @@ const Review = require("../models/review");
 const Campground = require("../models/campground");
 const {  reviewSchema } = require("../schemas");
 const Joi = require("joi");
+const {validateReview, isLoggedIn, isReviewAuthor} = require("../middleware")
 
 
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
+// const validateReview = (req, res, next) => {
+//     const { error } = reviewSchema.validate(req.body);
   
-    if (error) {
-      console.log(error);
-      const msg = error.details.map((val) => val.message);
-      throw new ExpressError(msg, 400);
-    } else {
-      next();
-    }
-};
+//     if (error) {
+//       console.log(error);
+//       const msg = error.details.map((val) => val.message);
+//       throw new ExpressError(msg, 400);
+//     } else {
+//       next();
+//     }
+// };
   
 
 router.post(
     "/",
+    isLoggedIn,
     validateReview,
     catchAsync(async (req, res) => {
         console.log(req.body);
@@ -32,6 +34,7 @@ router.post(
         let campground = await Campground.findById(id);
         const review = new Review(req.body);
         campground.reviews.push(review._id);
+        review.author = req.user.id;
         await review.save();
         await campground.save();
         req.flash("success", "Successfully created New Review")
@@ -41,6 +44,8 @@ router.post(
 
 router.delete(
     "/:reviewId",
+    isLoggedIn,
+    isReviewAuthor,
     catchAsync(async (req, res, nect) => {
         const {
             id,

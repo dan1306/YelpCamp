@@ -1,0 +1,78 @@
+<% layout('layouts/boilerplate.ejs') %>
+<h1>Register</h1>
+<form action="/register" method="POST" novalidate class="validated-form">
+  <div class="mb-3">
+    <label for="username" class="form-label"> UserName </label>
+    <div class="input-group">
+      <input
+        type="text"
+        id="username"
+        class="form-control"
+        placeholder="username"
+        aria-label="price"
+        aria-describedby="price-label"
+        name="username"
+        required
+      />
+      <div class="valid-feedback">Looks Good</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label"> Email </label>
+    <div class="input-group">
+      <input
+        type="email"
+        id="email"
+        class="form-control"
+        placeholder="Email"
+        aria-label="price"
+        aria-describedby="price-label"
+        name="email"
+        required
+      />
+      <div class="valid-feedback">Looks Good</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label"> Password </label>
+    <div class="input-group">
+      <input
+        type="password"
+        id="password"
+        class="form-control"
+        placeholder="Password"
+        aria-label="price"
+        aria-describedby="price-label"
+        name="password"
+        required
+      />
+      <div class="valid-feedback">Looks Good</div>
+    </div>
+  </div>
+  <button class="btn btn-success">Register</button>
+</form>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+       'use strict'
+ 
+       // Fetch all the forms we want to apply custom Bootstrap validation styles to
+       const forms = document.querySelectorAll('.validated-form')
+ 
+       // Loop over them and prevent submission
+       Array.from(forms)
+          .forEach(function (form) {
+             form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                   event.preventDefault()
+                   event.stopPropagation()
+                }
+ 
+                form.classList.add('was-validated')
+             }, false)
+          })
+    })()
+ </script>
