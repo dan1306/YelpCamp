@@ -15,9 +15,15 @@ let newCampground =  async (req, res) => {
 }
 
 let pstNewCampground = async (req, res, next) => {
+    
     const campground = new Campground(req.body);
+
+    req.files.map(async (val) => {
+        await campground.image.push({ url: val.path, filename: val.filename})
+    })
     campground.author = req.user._id
     await campground.save();
+    console.log("New campground", campground)
     req.flash("success", "Successfully made a new Campground")
     res.redirect(`/campgrounds/${campground._id}`);
 }
@@ -32,11 +38,15 @@ let deleCampground = async (req, res) => {
 let putEdit= async (req, res) => {
         
 
+
         
     const campground = await Campground.findByIdAndUpdate(
         req.params.id,
-        req.body
+       { ...req.body}
     );
+    req.files.map(async (val) => {
+        await campground.image.push({ url: val.path, filename: val.filename})
+    })
     if (!campground) {
         req.flash("error", "Can not find Campground")
         return res.redirect("/campgrounds")
@@ -73,7 +83,7 @@ let showCampground = async (req, res) => {
             }
         }
     ).populate("author");
-    console.log(campground);
+    console.log("SHOWCAMPGROUND", campground);
     let currentUser
     if (req.user) {
         currentUser = req.user

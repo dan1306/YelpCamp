@@ -7,7 +7,9 @@ const { CampgroundSchema } = require("../schemas");
 const Joi = require("joi");
 const { isLoggedIn, validateCampground, isAuthor } = require("../middleware")
 const campgroundCtrl = require("../controllers/campgrounds")
-
+const multer = require('multer')
+const {storage} = require('../cloudinary/index')
+const upload = multer({ storage })
 
 
 // const validateCampground = (req, res, next) => {
@@ -42,9 +44,17 @@ router.get("/new", isLoggedIn, campgroundCtrl.newCampground);
 router.post(
     "/new",
     isLoggedIn,
+    upload.array('image'),
     validateCampground,
     catchAsync(campgroundCtrl.pstNewCampground)
 );
+
+// router.post(
+//     "/new", upload.array('image'), (req, res) => {
+//         console.log(req.body, req.files)
+//         res.send("it worked")
+//     }
+// );
 
 router.get(
     "/:id",
@@ -73,6 +83,8 @@ router.put(
     "/:id/edit",
     isLoggedIn,
     isAuthor,
+    upload.array('image'),
+    validateCampground,
     catchAsync(campgroundCtrl.putEdit)
 );
 
